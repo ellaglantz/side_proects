@@ -1,168 +1,331 @@
-#include "maze.h"
-#include <utility>
+#include <algorithm>
+#include <cmath>
+#include <fstream>
 #include <iostream>
-#include <vector>
 #include <sstream>
 #include <string>
-#include <cstdlib>
-#include <fstream>
-#include <stdlib.h>
+#include <vector>
 //c++
+//image binarization!
 
-void writeFile(std::string outPutFile, std::vector<std::vector<int>> &processImage) {
+// standard deviation = mean(avg of all #), for each # subtrcat the mean then
+// square the results, then mean of those squared results, take square root of
+// that
 
-   std::ofstream output_file(outPutFile);
+// calculate global T
+// for each pixel A[i][j] in A do
+//    if A[i][j] < T then
+//        B[i][j] = 0;
+//    else;
+//        B[i][j] = 255
+//    endif
+// endfor
 
-   for (std::vector<std::vector<int>>::const_iterator i = (processImage).begin(); i != (processImage).end(); ++i) {
-       for (std::vector<int>::const_iterator j = i->begin(); j != i->end(); ++j) {
-           output_file << *j << " ";
-       }
-       output_file << "\n";
-   }
+// value of T can be found using a function
+// T equals medien of all pixels
 
+// input: Image A (grayscale)
+// output: Image B (black and white)n
+
+// for each pixel A[i][j] in A do
+//     calculate T[i][j] using local neighborhood
+//     if A[i][j] < T[i][j] then
+//         B[i][j] = 0
+//     else
+//         B[i][j] = 255
+//     endifJKJK
+// endfor
+
+// read file function to read my test.txt
+void readFile(std::vector<std::vector<double>> &image2DSpace,
+              std::string &fileName, int &rows, int &total) {
+  rows = 0;
+  total = 0;
+
+  std::ifstream inFile(fileName);
+  std::string line;
+
+  while (std::getline(inFile, line)) {
+    rows++;
+    std::vector<double> temp;
+    std::istringstream stream(line);
+    double val;
+
+    while (stream >> val) {
+      temp.push_back(val);
+      total++;
+    }
+
+    image2DSpace.push_back(temp);
+  }
 }
 
-int main(int argc, char *argv[]){
-   int seed = std::stoi(argv[1]);
-   std::srand(seed);
+// write file for my output.txt file
+void writeFile(std::string outPutFile,
+               std::vector<std::vector<double>> &processImage) {
 
-   int rows = std::stoi(argv[2]);
-   int cols = std::stoi(argv[3]);
-   std::string output_F = (argv[4]);
+  std::ofstream output_file(outPutFile);
 
-   std::vector<maze> theMaze(rows*cols);
-
-   for(int i = 0; i<rows; i++){
-       for(int j = 0; j<cols; j++){
-           maze temp;
-           theMaze.push_back(temp);
-       }
-   }
-   theMaze[0].northCheck();
-   theMaze[rows*cols - 1].southCheck();
-
-   theMaze[0].ifVisitedCheck();
-
-   //theMaze[rows*cols - 1].ifVisitedCheck();
-// create empty dynamic array `A`
-   std::vector<maze> aVector;
-   std::vector<int> indexVector;
-// insert cell [0,0] at the end of `A`
-   aVector.push_back(theMaze[0]);
-// while `A` is not empty
-    indexVector.push_back(0);
-   while(aVector.size() != 0){
-       int currentPos = indexVector[indexVector.size()-1];
-       //`current` <- remove last element from `A`
-       aVector.pop_back();
-       indexVector.pop_back();
-//     `neighbors` <- `current`'s neighbors not visited yet
-       std::vector<maze> neigh;
-       std::vector<std::string> lastV;
-       int northPos = currentPos-cols;
-       if(northPos>=0 && northPos<rows*cols - 1){
-           bool visited = theMaze[northPos].getVisited();
-           if(visited == false){
-               neigh.push_back(theMaze[northPos]);
-               lastV.push_back("north");
-           }
-       }
-       int southPos = currentPos+cols;
-       if(southPos>=0 && southPos<=rows*cols - 1){
-           bool visited = theMaze[southPos].getVisited();
-           if(visited == false){
-               neigh.push_back(theMaze[southPos]);
-               lastV.push_back("south");
-           }
-       }
-       int eastPos=currentPos + 1;
-       int eastCheckMain = currentPos % cols +1;
-       if(eastCheckMain<cols){
-           bool visited = theMaze[eastPos].getVisited();
-           if(visited == false){
-               neigh.push_back(theMaze[eastPos]);
-               lastV.push_back("east");
-           }
-       }
-       int westPos=currentPos - 1;
-       int westCheckMain = currentPos % cols - 1;
-       if(westCheckMain >= 0){
-           bool visited = theMaze[westPos].getVisited();
-           if(visited == false){
-               neigh.push_back(theMaze[westPos]);
-               lastV.push_back("west");
-           }
-       }
-
-//     if `neighbors` is not empty
-       if(neigh.size() != 0){
-           //insert `current` at the end of `A`
-           aVector.push_back(theMaze[currentPos]);
-           indexVector.push_back(currentPos);
-//         `neigh` <- pick a random neighbor from `neighbors`
-           int idx = std::rand() / ((RAND_MAX + 1u) / neigh.size());
-
-
-            //remove the wall between `current` and `neigh`
-           if(lastV[idx]=="north"){
-               //remove north wall
-               theMaze[currentPos].northCheck();
-               theMaze[northPos].southCheck();
-               theMaze[northPos].ifVisitedCheck();
-               aVector.push_back(theMaze[northPos]);
-               //currentPos = northPos;
-               indexVector.push_back(northPos);
-           }
-           else if(lastV[idx]=="south"){
-               //remove north wall
-               theMaze[currentPos].southCheck();
-               theMaze[southPos].northCheck();
-               theMaze[southPos].ifVisitedCheck();
-               aVector.push_back(theMaze[southPos]);
-               //currentPos = southPos;
-               indexVector.push_back(southPos);
-           }
-           else if(lastV[idx]=="east"){
-               //remove north wall
-               theMaze[currentPos].eastCheck();
-               theMaze[eastPos].westCheck();
-               theMaze[eastPos].ifVisitedCheck();
-               aVector.push_back(theMaze[eastPos]);
-               //currentPos = eastPos;
-               indexVector.push_back(eastPos);
-           }
-           else if(lastV[idx]=="west"){
-               //remove north wall
-               theMaze[currentPos].westCheck();
-               theMaze[westPos].eastCheck();
-               //mark `neigh` as visited
-               theMaze[westPos].ifVisitedCheck();
-               //nsert `neigh` at the end of `A`
-               aVector.push_back(theMaze[westPos]);
-               //currentPos = westPos;
-               indexVector.push_back(westPos);
-           }
-       }
-       neigh.clear();
-       lastV.clear();
-   }
-
-
-
-   std::vector<std::vector<int>> finalV;
-   std::vector<int> columnsVec;
-   for(int i = 0; i < rows; i++){
-       for(int j = 0; j<cols; j++){
-           int total=0;
-           total = theMaze[i*cols+j].getNorth() +theMaze[i*cols+j].getSouth()+theMaze[i*cols+j].getEast()+theMaze[i*cols+j].getWest();
-
-           columnsVec.push_back(total);
-
-       }
-       finalV.push_back(columnsVec);
-       columnsVec.clear();
-   }
-
-   writeFile(output_F, finalV);
-   return 0;
+  for (std::vector<std::vector<double>>::const_iterator i =
+           (processImage).begin();
+       i != (processImage).end(); ++i) {
+    for (std::vector<double>::const_iterator j = i->begin(); j != i->end();
+         ++j) {
+      output_file << *j << " ";
+    }
+    output_file << "\n";
+  }
 }
+
+double findMinVal(std::vector<std::vector<double>> &processImage) {
+  double minVal = 255;
+  std::vector<double> onedimvector;
+
+  for (int i = 0; i < processImage.size(); i++) {
+    for (int j = 0; j < processImage[0].size(); j++) {
+      onedimvector.push_back(processImage[i][j]);
+    }
+  }
+
+  for (int i = 0; i < onedimvector.size(); i++) {
+    if (onedimvector[i] < minVal) {
+      minVal = onedimvector[i];
+    }
+  }
+  return minVal;
+}
+
+double findMaxVal(std::vector<std::vector<double>> &processImage) {
+
+  double maxVal = 0;
+  std::vector<double> onedimvector;
+
+  for (int i = 0; i < processImage.size(); i++) {
+    for (int j = 0; j < processImage[0].size(); j++) {
+      onedimvector.push_back(processImage[i][j]);
+    }
+  }
+  for (int i = 0; i < onedimvector.size(); i++) {
+    if (onedimvector[i] > maxVal) {
+      maxVal = onedimvector[i];
+    }
+  }
+  return maxVal;
+}
+
+// copy and paste for compiling
+// g++ -std=c++11 -Wall main.cpp -o prog && ./prog global text.txt output.txt
+// g++ -std=c++11 -Wall main1.cpp -o prog && ./prog local text.txt output.txt 7
+
+// argv[x] x is the index from ./prog so the local or global is argv[1]
+// because that is its index main function
+int main(int argc, char const *argv[]) {
+    double thresLoc; 
+  int total=0;
+  int rows=0;
+  double realMedian;
+  int num;
+  
+  
+  
+  std::string glo_loc;
+  glo_loc = argv[1];
+  // std::cout<<glo_loc;
+
+  std::string input;
+  input = argv[2];
+  // std::cout<<input;
+
+  std::string output;
+  output = argv[3];
+  // std::cout<<output;
+
+  // if argv[4] is local then that means we will also need a num variable
+  // because that is the threshold.
+  if (glo_loc == "local") {
+
+    // stoi converts a string to an integer.
+    num = std::stoi(argv[4]);
+
+    // prints out num in console
+    // will only print out num if argv[1] is local
+    //std::cout << "num = " << num << std::endl;
+  }
+
+  // creating vector
+  std::vector<std::vector<double>> twodvector;
+
+  // calling my readFile function
+  readFile(twodvector, input, rows, total);
+  
+ 
+  
+  std::vector<std::vector<double>>copyvector=twodvector;
+  int cols= total/rows;
+  //std::cout<<rows<<" "<<cols;
+  // int size= twodvector.size();
+
+  double min = findMinVal(twodvector);
+  double max = findMaxVal(twodvector);
+
+  ////print out vector
+  // for (int i = 0; i < rows; i++) {
+  //   for (int j = 0; j < cols / rows; j++) {
+  //     std::cout << twodvector[i][j] << " ";
+  //   }
+  //   //std::cout << std::endl;
+  // }
+
+  // creating one d vector to find the median
+  std::vector<double> onedvector;
+  
+  for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < cols; j++) {
+      onedvector.push_back(twodvector[i][j]);
+    }
+    // std::cout << std::endl;
+  }
+
+  // sort vector to find median
+  std::sort(onedvector.begin(), onedvector.end());
+
+  // threshold for odd or even
+  // we have a varaible called realMedian because in our two d vector to
+  // calculate global T we cant distinguish from if its odd or even in that so
+  // having one realmedian mamkes this easier if the size of our on d vector
+  // is even
+  if (onedvector.size() % 2 == 0) {
+    double evenMedian = ((onedvector[onedvector.size() / 2] +
+                          onedvector[(onedvector.size() / 2) - 1]) /
+                         2);
+    realMedian = evenMedian;
+    // std::cout<<evenMedian;
+  }
+  // if the size of our one d vector is odd
+  else {
+    double oddMedian = onedvector[onedvector.size() / 2];
+    realMedian = oddMedian;
+    // std::cout<<oddMedian;
+  }
+  ////for checking if one d vector is correct
+  // for (int i = 0; i < onedvector.size(); i++) {
+  //   onedvector.push_back(twodvector[i][j]);
+
+  //   std::cout<<onedvector[i]<<" ";
+  // }
+  // std::cout << std::endl;
+    
+  ////calculate global T
+  ////print out realMedian
+  // std::cout<<realMedian;
+  for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < cols; j++) {
+      // uncomment to check if two converst to sorted 1 one d is right
+      // std::cout<<twodvector[i][j]<<" ";
+      if (twodvector[i][j] < realMedian) {
+        // black RGB value
+        twodvector[i][j] = 0;
+      } else {
+        // black RGB vlaue
+        twodvector[i][j] = 255;
+      }
+    }
+  }
+  ////print out vector
+  // for (int i = 0; i < rows; i++) {
+  //   for (int j = 0; j < cols / rows; j++) {
+  //     std::cout << twodvector[i][j] << " ";
+  //   }
+  //   std::cout << std::endl;
+  // }
+  if(glo_loc == "local"){
+      double localArr[rows][cols];
+      //std::cout << num << std::endl;
+    double R = 0.5 * (max - min);
+    //std::cout << "R = " << R << std::endl;
+    //std::cout << "checkpoint 1" << std::endl;
+    std::vector<double> neighborF;
+  for (int i = 0; i < rows; i++) {  
+    for (int j = 0; j < cols; j++) { 
+        neighborF.clear();
+        //std::cout << "num Check 2 " << num << std::endl;
+      for (int x = (i - num / 2); x <= (i + num / 2);
+           x++) { 
+        for (int y = (j - num / 2); y <= (j + num / 2);
+             y++) { 
+          if (x < 0 || y < 0 || x > rows - 1 ||
+              y > cols - 1) { 
+              
+          } else {
+            neighborF.push_back(copyvector[x][y]);
+          }
+        }
+      }
+      //std::cout <<"checkpoint 2" << std::endl;
+//     for (int i = 0; i < neighborF.size(); i++) {
+//       std::cout << neighborF[i] << " ";
+    
+//   }
+    std::cout << std::endl;
+      //std::cout<<neighborF;
+
+      double getMin = 0.0;
+
+      for (int a = 0; a < neighborF.size(); a++) {
+        getMin += neighborF[a];
+      }
+
+      double meanVal = getMin / (double)neighborF.size();
+
+      double standardDeviation = 0.0;
+      for (unsigned int m = 0; m < neighborF.size(); m++) {
+        standardDeviation += pow((neighborF[m] - meanVal), 2);
+      }
+
+      standardDeviation /= (double)neighborF.size();
+      standardDeviation = std::sqrt(standardDeviation);
+
+  
+      double thresLoc = meanVal * (1.0 + 0.2 * ((standardDeviation / R) - 1.0));
+        // std::cout << "Standard Dev: " << standardDeviation << std::endl;
+        // std::cout << "Max: " << max << " Min: " << min << std::endl;
+        // std::cout << "Mean " << meanVal << std::endl;  
+        // std::cout << "Local Thresh: " << thresLoc << std::endl;
+
+         localArr[i][j] = thresLoc;
+    }
+  }
+
+  
+   for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < cols; j++) {
+      // uncomment to check if two converst to sorted 1 one d is right
+      // std::cout<<twodvector[i][j]<<" ";
+      if (copyvector[i][j] < localArr[i][j]) {
+        // black RGB value
+        copyvector[i][j] = 0;
+      } else {
+        // black RGB vlaue
+        copyvector[i][j] = 255;
+      }
+    }
+  }
+
+//   for (int b = 0; b < processImage.size(); b++) {
+//     for (int k = 0; k < processImage[0].size(); k++) {
+//       if (processImage[b][k] < newVector[b][k]) {
+//         processImage[b][k] = 0;
+//       } else {
+//         processImage[b][k] = 255;
+//       }
+//     }
+//   }
+    writeFile(output, copyvector);
+  }else{
+    writeFile(output, twodvector);
+  }
+  // calling our writeFile function to spit out the output.txt file that will
+  // show the RGB blakc or white change
+  return 0;
+}
+
