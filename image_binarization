@@ -1,0 +1,168 @@
+#include "maze.h"
+#include <utility>
+#include <iostream>
+#include <vector>
+#include <sstream>
+#include <string>
+#include <cstdlib>
+#include <fstream>
+#include <stdlib.h>
+//c++
+
+void writeFile(std::string outPutFile, std::vector<std::vector<int>> &processImage) {
+
+   std::ofstream output_file(outPutFile);
+
+   for (std::vector<std::vector<int>>::const_iterator i = (processImage).begin(); i != (processImage).end(); ++i) {
+       for (std::vector<int>::const_iterator j = i->begin(); j != i->end(); ++j) {
+           output_file << *j << " ";
+       }
+       output_file << "\n";
+   }
+
+}
+
+int main(int argc, char *argv[]){
+   int seed = std::stoi(argv[1]);
+   std::srand(seed);
+
+   int rows = std::stoi(argv[2]);
+   int cols = std::stoi(argv[3]);
+   std::string output_F = (argv[4]);
+
+   std::vector<maze> theMaze(rows*cols);
+
+   for(int i = 0; i<rows; i++){
+       for(int j = 0; j<cols; j++){
+           maze temp;
+           theMaze.push_back(temp);
+       }
+   }
+   theMaze[0].northCheck();
+   theMaze[rows*cols - 1].southCheck();
+
+   theMaze[0].ifVisitedCheck();
+
+   //theMaze[rows*cols - 1].ifVisitedCheck();
+// create empty dynamic array `A`
+   std::vector<maze> aVector;
+   std::vector<int> indexVector;
+// insert cell [0,0] at the end of `A`
+   aVector.push_back(theMaze[0]);
+// while `A` is not empty
+    indexVector.push_back(0);
+   while(aVector.size() != 0){
+       int currentPos = indexVector[indexVector.size()-1];
+       //`current` <- remove last element from `A`
+       aVector.pop_back();
+       indexVector.pop_back();
+//     `neighbors` <- `current`'s neighbors not visited yet
+       std::vector<maze> neigh;
+       std::vector<std::string> lastV;
+       int northPos = currentPos-cols;
+       if(northPos>=0 && northPos<rows*cols - 1){
+           bool visited = theMaze[northPos].getVisited();
+           if(visited == false){
+               neigh.push_back(theMaze[northPos]);
+               lastV.push_back("north");
+           }
+       }
+       int southPos = currentPos+cols;
+       if(southPos>=0 && southPos<=rows*cols - 1){
+           bool visited = theMaze[southPos].getVisited();
+           if(visited == false){
+               neigh.push_back(theMaze[southPos]);
+               lastV.push_back("south");
+           }
+       }
+       int eastPos=currentPos + 1;
+       int eastCheckMain = currentPos % cols +1;
+       if(eastCheckMain<cols){
+           bool visited = theMaze[eastPos].getVisited();
+           if(visited == false){
+               neigh.push_back(theMaze[eastPos]);
+               lastV.push_back("east");
+           }
+       }
+       int westPos=currentPos - 1;
+       int westCheckMain = currentPos % cols - 1;
+       if(westCheckMain >= 0){
+           bool visited = theMaze[westPos].getVisited();
+           if(visited == false){
+               neigh.push_back(theMaze[westPos]);
+               lastV.push_back("west");
+           }
+       }
+
+//     if `neighbors` is not empty
+       if(neigh.size() != 0){
+           //insert `current` at the end of `A`
+           aVector.push_back(theMaze[currentPos]);
+           indexVector.push_back(currentPos);
+//         `neigh` <- pick a random neighbor from `neighbors`
+           int idx = std::rand() / ((RAND_MAX + 1u) / neigh.size());
+
+
+            //remove the wall between `current` and `neigh`
+           if(lastV[idx]=="north"){
+               //remove north wall
+               theMaze[currentPos].northCheck();
+               theMaze[northPos].southCheck();
+               theMaze[northPos].ifVisitedCheck();
+               aVector.push_back(theMaze[northPos]);
+               //currentPos = northPos;
+               indexVector.push_back(northPos);
+           }
+           else if(lastV[idx]=="south"){
+               //remove north wall
+               theMaze[currentPos].southCheck();
+               theMaze[southPos].northCheck();
+               theMaze[southPos].ifVisitedCheck();
+               aVector.push_back(theMaze[southPos]);
+               //currentPos = southPos;
+               indexVector.push_back(southPos);
+           }
+           else if(lastV[idx]=="east"){
+               //remove north wall
+               theMaze[currentPos].eastCheck();
+               theMaze[eastPos].westCheck();
+               theMaze[eastPos].ifVisitedCheck();
+               aVector.push_back(theMaze[eastPos]);
+               //currentPos = eastPos;
+               indexVector.push_back(eastPos);
+           }
+           else if(lastV[idx]=="west"){
+               //remove north wall
+               theMaze[currentPos].westCheck();
+               theMaze[westPos].eastCheck();
+               //mark `neigh` as visited
+               theMaze[westPos].ifVisitedCheck();
+               //nsert `neigh` at the end of `A`
+               aVector.push_back(theMaze[westPos]);
+               //currentPos = westPos;
+               indexVector.push_back(westPos);
+           }
+       }
+       neigh.clear();
+       lastV.clear();
+   }
+
+
+
+   std::vector<std::vector<int>> finalV;
+   std::vector<int> columnsVec;
+   for(int i = 0; i < rows; i++){
+       for(int j = 0; j<cols; j++){
+           int total=0;
+           total = theMaze[i*cols+j].getNorth() +theMaze[i*cols+j].getSouth()+theMaze[i*cols+j].getEast()+theMaze[i*cols+j].getWest();
+
+           columnsVec.push_back(total);
+
+       }
+       finalV.push_back(columnsVec);
+       columnsVec.clear();
+   }
+
+   writeFile(output_F, finalV);
+   return 0;
+}
