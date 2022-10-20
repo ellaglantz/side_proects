@@ -1,0 +1,103 @@
+#include <iostream>
+
+void checkRows(int matrix[][9], bool &right){
+    int sum = 0;
+    for(int i = 0; i < 9; i++) {
+        for(int j = 0; j < 9; j++) {
+            sum += matrix[i][j];
+            //add eveyrthing in currnet row to sum
+        }
+        //std::cout<<sum<<std::endl;
+        if(sum != 45){
+            right = false;
+            return;
+        }
+        sum = 0;
+    }
+}
+
+void checkCols(int matrix[][9], bool &right){
+    int sum = 0;
+    for(int i = 0; i < 9; i++) {
+        for(int j = 0; j < 9; j++) {
+            sum += matrix[j][i];
+            //add eveyrthing in currnet row to sum
+        }
+        //std::cout<<sum<<std::endl;
+        if(sum != 45){
+            right = false;
+            return;
+        }
+        sum = 0;
+    }
+}
+
+void checkBoxes(int matrix[][9], bool &right){
+    int sum = 0;
+    for(int i = 0; i < 9; i += 3){
+        for(int j = 0; j < 9; j += 3) {
+            for(int x = i; x < i + 3; x++) {
+                for(int y = j; y < j + 3; y++) {
+                    //std::cout<<x<<" "<<y<<std::endl;
+                    sum += matrix[x][y];
+            //add eveyrthing in currnet row to sum
+                }
+                //std::cout<<sum<<std::endl;
+            }
+            if(sum != 45){
+                right = false;
+                return;
+            }
+            sum = 0;
+        }
+    }
+}
+
+int main(){
+    bool right = true;
+    int matrix[9][9];
+    for(int i = 0; i < 9; i++){
+        for(int j = 0; j < 9; j++){
+            std::cin >> matrix[i][j];
+        }
+    }
+    int array[9] = {0};
+    for(int i = 0; i < 9; i++){
+        for(int j = 0; j < 9;j++){
+            array[matrix[i][j]];//++
+        }
+    }
+    checkRows(matrix, right);
+    checkCols(matrix, right);
+    checkBoxes(matrix, right);
+    if(right){
+        std::cout<<"Solution is good!"<<std::endl;
+    }
+    else{
+        std::cout<<"Wrong solution!"<<std::endl;
+    }
+    return 0;
+}
+
+
+//For this assignment, you will be given a filled out Sudoku board state and you will
+//check whether the board has been properly solved or not according to the given rules.
+//Once you have read and stored the puzzle, you should test each of the rules to make
+//sure that the condition is satisfied (1-9 in each block, no two of the same value in the same column etc
+
+    // } // Main check loop
+    //             if(matrix[i][j]+//(the rest of the elements in this row) /45==0){
+    //                 count++;
+    //                 std::cout<<count<<std::endl;
+    //                 //if what ever element in that plus eveyr other element in that i row added together
+    //                 //stored in count /45 equals 0 then yes it works
+    //                 //need to us ejust i rows
+    //             }
+    //             else{
+    //                 std::cout<<"Wrong solution!"<<std::endl;
+    //             }
+    //             // if(matrix[i][j]+total){
+    //             //     add+=matrix[i][j];
+    //             // }
+    //         }
+    //     }
