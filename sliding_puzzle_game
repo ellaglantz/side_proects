@@ -1,0 +1,102 @@
+
+#include <iostream>
+#include <sstream>
+#include <string>
+#include<algorithm>
+
+int main(){
+
+    int input;
+    int startArr[3][3];
+    int holdi;
+    int holdj;
+    // taling in the matrix
+    for(int i =0; i < 3; i++){
+        for(int j =0; j < 3; j++){
+            std::cin >>input;
+            startArr[i][j] = input;
+            if(startArr[i][j]==0){
+                holdi=i;
+                holdj=j;
+            }
+        }
+    }
+
+    char move;
+    while(std::cin>>move){
+        switch(move){
+            case 'L':
+                if(holdj==0){
+                    break;
+                 }
+                std::swap(startArr[holdi][holdj], startArr[holdi][holdj - 1]);
+                holdj = holdj - 1;
+                break;
+
+            case 'R':
+                    //cant move R if in the last column so check for this by doing this
+                if(holdj==2){
+                    break;
+                }
+                std::swap(startArr[holdi][holdj], startArr[holdi][holdj + 1]);
+                holdj = holdj + 1;
+                break;
+
+            case 'U':
+                if(holdi==0){
+                    break;
+                }
+                std::swap(startArr[holdi][holdj], startArr[holdi - 1 ][holdj]);
+                holdi = holdi - 1;
+                break;
+
+            case'D':
+                if(holdi==2){
+                    break;
+                }
+                std::swap(startArr[holdi][holdj], startArr[holdi + 1][holdj]);
+                holdi = holdi + 1;
+                break;
+
+        }
+    }
+
+        bool winner = true;
+        for(int i=0; i<3; i++){
+            for(int j=0; j<3; j++){
+                if(i==2 && j==2 && startArr[i][j]!=0){
+                    winner = false;
+                }
+                else if (startArr[i][j]!=(3*i + j + 1)){
+                        winner = false;
+                }
+            }
+                if(winner){
+                    std::cout<<"Solution is good!";
+                }
+                else{
+                    std::cout<<"Wrong solution!";
+                    
+    }
+
+    return 0;
+        }
+    // if(winner){
+    //     std::cout<<"Solution is good!";
+    // }
+    // else{
+    //     std::cout<<"Wrong solution!";
+    // }
+
+    // return 0;
+}
+
+/*
+1 8 2 0 4 3 7 6 5
+D R R R U L
+*/
+// 1 2 3 4 5 0 7 8 6
+// U R R D L L R R D D L R
+
+//1 2 3 4 5 0 7 8 6
+//U R R D L L R R D D L R
