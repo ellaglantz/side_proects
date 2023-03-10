@@ -14,12 +14,12 @@ impl<T: Clone> Array2<T> {
         }
     }
 
-    // Will make an array from the given cols, it'll fill the array2, right now its just 
-    // filling with one value in every index, we want the correct ones though 
-    pub fn from_col_major(width: usize, height: usize, data: Vec<T>) -> Self{
+    // Will make an array from the given cols, it'll fill the array2, right now its just
+    // filling with one value in every index, we want the correct ones though
+    pub fn from_col_major(width: usize, height: usize, data: Vec<T>) -> Self {
         let mut data: Vec<Vec<T>> = vec![vec![data[0].clone(); width]; height];
-        for c in 0..width{
-            for a in 0..height{
+        for c in 0..width {
+            for a in 0..height {
                 let index: usize = c * height + a;
                 data[index] = data[a * width + c].clone();
             }
@@ -61,7 +61,7 @@ impl<T: Clone> Array2<T> {
     }
 }
 
-//adding test cases to make sur eour functions are accurate
+//adding test cases to make sure our functions are accurate
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -71,21 +71,23 @@ mod tests {
         let my_arr2 = Array2::new(3, 2, 'a');
 
         let collected_data: Vec<_> = my_arr2.iter_col_major().collect();
-        assert_eq!(collected_data, vec![
-            (0, 0, &'a'),
-            (0, 1, &'a'),
-            (1, 0, &'a'),
-            (1, 1, &'a'),
-            (2, 0, &'a'),
-            (2, 1, &'a'),
-        ]);
+        assert_eq!(
+            collected_data,
+            vec![
+                (0, 0, &'a'),
+                (0, 1, &'a'),
+                (1, 0, &'a'),
+                (1, 1, &'a'),
+                (2, 0, &'a'),
+                (2, 1, &'a'),
+            ]
+        );
     }
 
     #[test]
-    fn checkWandH(){
-        let checking: Vec<_> = vec![1,2,3,4,5,6];
-        let my_arr2 = Array2::new_from_row_major(3, 2, checking);
-        assert_eq!(my_arr2.width(), 3);
-        assert_eq!(my_arr2.height(), 2);
+    fn check_w_and_h() {
+        let my_arr2 = Array2::new(3, 2, 0);
+        assert_eq!(my_arr2.width, 3);
+        assert_eq!(my_arr2.height, 2);
     }
 }
