@@ -1,0 +1,76 @@
+use csc411_image::{GrayImage, Read};
+use std::env;
+use std::io;
+
+fn is_valid_sudoku(puzzle: &[u16]) -> bool {
+    // Check rows
+    for i in 0..9 {
+        let mut row = [false; 9];
+        for j in 0..9 {
+            let index = i * 9 + j;
+            if puzzle[index] == 0 {
+                return false;
+            }
+            if row[(puzzle[index] - 1) as usize] {
+                return false;
+            }
+            row[(puzzle[index] - 1) as usize] = true;
+        }
+    }
+
+    // Check columns
+    for i in 0..9 {
+        let mut col = [false; 9];
+        for j in 0..9 {
+            let index = i + j * 9;
+            if col[(puzzle[index] - 1) as usize] {
+                return false;
+            }
+            col[(puzzle[index] - 1) as usize] = true;
+        }
+    }
+
+    // Check sub-grids
+    for i in 0..3 {
+        for j in 0..3 {
+            let mut subgrid = [false; 9];
+            for k in 0..3 {
+                for l in 0..3 {
+                    let index = (i * 3 + k) * 9 + j * 3 + l;
+                    if subgrid[(puzzle[index] - 1) as usize] {
+                        return false;
+                    }
+                    subgrid[(puzzle[index] - 1) as usize] = true;
+                }
+            }
+        }
+    }
+
+    true
+}
+
+fn main() {
+    //Getting the Image
+    let input = env::args().nth(1);
+    let input = if input.is_none() {
+        let mut input_str = String::new();
+        io::stdin().read_line(&mut input_str).unwrap();
+        input_str = input_str.trim().to_string();
+        Some(input_str)
+    } else {
+        input
+    };
+    assert!(input.is_some());
+    let img = GrayImage::read(input.as_deref()).unwrap();
+
+    let mut puzzle = Vec::new();
+    for pixel in img.pixels.iter() {
+        puzzle.push(pixel.value);
+    }
+
+    if is_valid_sudoku(&puzzle) {
+        std::process::exit(0);
+    } else {
+        std::process::exit(1);
+    }
+}
